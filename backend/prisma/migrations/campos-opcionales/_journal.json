@@ -1,0 +1,11 @@
+{
+  "version": "campos-opcionales",
+  "tag": "7.8.0",
+  "when": "2026-05-07T00:00:00.000000Z",
+  "steps": [
+    {
+      "type": "sql",
+      "raw": "-- Hacer campos opcionales en el modelo Informe\nALTER TABLE \"Informe\" ALTER COLUMN \"equipo\" DROP NOT NULL;\nALTER TABLE \"Informe\" ALTER COLUMN \"noOrden\" DROP NOT NULL;\nALTER TABLE \"Informe\" ALTER COLUMN \"nSerie\" DROP NOT NULL;\nALTER TABLE \"Informe\" ALTER COLUMN \"cliente\" DROP NOT NULL;\nALTER TABLE \"Informe\" ALTER COLUMN \"sitio\" DROP NOT NULL;\nALTER TABLE \"Informe\" ALTER COLUMN \"tipoEquipo\" DROP NOT NULL;\nALTER TABLE \"Informe\" ALTER COLUMN \"tempAmbiente\" DROP NOT NULL;\nALTER TABLE \"Informe\" ALTER COLUMN \"versionFirmware\" DROP NOT NULL;\nALTER TABLE \"Informe\" ALTER COLUMN \"versionWebServer\" DROP NOT NULL;\nALTER TABLE \"Informe\" ALTER COLUMN \"snmpV1\" DROP NOT NULL;\nALTER TABLE \"Informe\" ALTER COLUMN \"snmpV2\" DROP NOT NULL;\nALTER TABLE \"Informe\" ALTER COLUMN \"equipoApto\" SET DEFAULT false;"
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Usuario {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  passwordHash String
+  nombre       String
+  rol          Rol        @default(TECNICO)
+  createdAt    DateTime   @default(now())
+
+  informesCreados   Informe[] @relation("TecnicoInformes")
+  informesRevisados Informe[] @relation("RevisorInformes")
+
+  pdfsGenerados Pdf[]
+}
+
+model Informe {
+  id String @id @default(uuid())
+
+  equipo     String?
+  noOrden    String?
+  nSerie     String?
+  cliente    String?
+  sitio      String?
+  tipoEquipo TipoEquipo?
+
+  tempAmbiente  Float?
+  observaciones String?
+
+  versionFirmware  String?
+  versionWebServer String?
+
+  snmpV1 Json?
+  snmpV2 Json?
+
+  testsRealizados String[]
+  cellnexConfig   String[]
+
+  equipoApto      Boolean  @default(false)
+  motivosNoApto   String?
+  actuaciones     String?
+  fechaConclusion DateTime
+  firmaTecnico    String
+
+  medidas Medida[]
+
+  estado             EstadoInforme @default(PENDIENTE)
+  tecnico            Usuario       @relation("TecnicoInformes", fields: [tecnicoId], references: [id])
+  tecnicoId          String
+  revisor            Usuario?      @relation("RevisorInformes", fields: [revisorId], references: [id])
+  revisorId          String?
+  comentariosRevisor String?
+  reviewedAt         DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pdfs Pdf[]
+
+  @@index([estado])
+  @@index([tecnicoId])
+}
+
+model Medida {
+  id        String     @id @default(uuid())
+  informe   Informe    @relation(fields: [informeId], references: [id], onDelete: Cascade)
+  informeId String
+  tipo      TipoMedida
+  orden     Int
+
+  frecMhz Float?
+  potW    Float?
+  vpaV    Float?
+  ipa1    Float?
+  ipa2    Float?
+  ipa3    Float?
+  tOut    Float?
+  tCase   Float?
+  tPwS    Float?
+  eff     Float?
+  if1     Float?
+  if2     Float?
+  if3     Float?
+
+  @@index([informeId])
+}
+
+model Pdf {
+  id            String   @id @default(uuid())
+  informe       Informe  @relation(fields: [informeId], references: [id], onDelete: Cascade)
+  informeId     String
+  contenido     Bytes
+  generadoPor   Usuario  @relation(fields: [generadoPorId], references: [id])
+  generadoPorId String
+  createdAt     DateTime @default(now())
+
+  @@index([informeId])
+  @@index([generadoPorId])
+}
+
+enum Rol {
+  TECNICO
+  ADMIN
+}
+
+enum TipoEquipo {
+  NUEVO
+  REPARADO_FABRICA
+  REPARADO_VIMESA
+}
+
+enum EstadoInforme {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+  DEVUELTO
+}
+
+enum TipoMedida {
+  PRINCIPAL
+  CAMARA
+}

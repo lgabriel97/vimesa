@@ -7,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   MEDIDA_COLUMNS,
   LOCKED_ROW_COUNT,
-} from "@/VerificationForm/constants/medidas";
-import type { FormValues } from "@/VerificationForm/types/verificacion";
+} from "@/informes/tipos/verificacion-fm/constants/medidas";
+import type { FormValues } from "../schema";
 import { Helper } from "@/components/common/helper";
 
 export function MedidasTable() {

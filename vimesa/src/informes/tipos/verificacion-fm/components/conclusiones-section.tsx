@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { FormValues } from "@/VerificationForm/types/verificacion";
+import type { FormValues } from "../schema";
 
 export function ConclusionesSection() {
   const {

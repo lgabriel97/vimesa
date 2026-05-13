@@ -8,14 +8,16 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import type { FormValues } from "./types/verificacion";
-import { InformeSchema } from "@/lib/schemas/informe";
+import { InformeSchema } from "./schema";
 import { apiFetch, ApiError } from "@/lib/api";
 import { CabeceraSection } from "./components/cabecera-section";
-import { CellnexSection, ActuacionesSection, ConclusionesSection } from ".";
 import { MedidasTable } from "./components/medidas-table";
 import { MedidasCamaraTable } from "./components/medidas-camara-table";
-import { TestsFirmwareSection } from "./tests-firmware-section";
 import { DEFAULT_MEDIDAS, DEFAULT_MEDIDAS_CAMARA } from "./constants/medidas";
+import { TestsFirmwareSection } from "./components/tests-firmware-section";
+import { CellnexSection } from "./components/cellnex-section";
+import { ActuacionesSection } from "./components/actuaciones-section";
+import { ConclusionesSection } from "./components/conclusiones-section";
 
 const DEFAULT_VALUES: FormValues = {
   equipo: "",

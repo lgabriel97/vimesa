@@ -1,11 +1,4 @@
-import fs from "fs";
-import path from "path";
-
-// Cargamos el logo una sola vez como base64 para que Puppeteer pueda renderizarlo
-// sin tener que servirlo por HTTP
-const LOGO_PATH = path.join(__dirname, "assets", "vimesa-logo.png");
-const LOGO_BASE64 = fs.readFileSync(LOGO_PATH).toString("base64");
-const LOGO_DATA_URI = `data:image/png;base64,${LOGO_BASE64}`;
+import { LOGO_DATA_URI } from "../../assets/logo";
 
 // Helper para mostrar valores que pueden ser null
 function v(value: unknown): string {

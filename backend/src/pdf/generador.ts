@@ -1,5 +1,5 @@
 import puppeteer, { Browser } from "puppeteer";
-import { generarHtmlInforme } from "./plantilla";
+import { generarHtmlInforme } from "../informes/verificacion-fm/pdf";
 
 let browserPromise: Promise<Browser> | null = null;
 

@@ -13,8 +13,8 @@ import {
 } from "@/components/ui/field";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { FormValues } from "./types/verificacion";
-import { TESTS_DISPONIBLES } from "@/VerificationForm/constants/opciones";
+import type { FormValues } from "@/informes/tipos/verificacion-fm/schema";
+import { TESTS_DISPONIBLES } from "@/informes/tipos/verificacion-fm/constants/opciones";
 
 export function TestsFirmwareSection() {
   const { register, control } = useFormContext<FormValues>();
@@ -92,11 +92,17 @@ export function TestsFirmwareSection() {
               </Field>
               <Field>
                 <FieldLabel>Mask</FieldLabel>
-                <Input placeholder="255.255.255.0" {...register("snmpV1.mask")} />
+                <Input
+                  placeholder="255.255.255.0"
+                  {...register("snmpV1.mask")}
+                />
               </Field>
               <Field>
                 <FieldLabel>Gateway</FieldLabel>
-                <Input placeholder="192.168.1.254" {...register("snmpV1.gateway")} />
+                <Input
+                  placeholder="192.168.1.254"
+                  {...register("snmpV1.gateway")}
+                />
               </Field>
             </div>
           </FieldSet>
@@ -125,11 +131,17 @@ export function TestsFirmwareSection() {
               </Field>
               <Field>
                 <FieldLabel>Mask</FieldLabel>
-                <Input placeholder="255.255.255.0" {...register("snmpV2.mask")} />
+                <Input
+                  placeholder="255.255.255.0"
+                  {...register("snmpV2.mask")}
+                />
               </Field>
               <Field>
                 <FieldLabel>Gateway</FieldLabel>
-                <Input placeholder="192.168.1.254" {...register("snmpV2.gateway")} />
+                <Input
+                  placeholder="192.168.1.254"
+                  {...register("snmpV2.gateway")}
+                />
               </Field>
               <Field>
                 <FieldLabel>Versión Web Server</FieldLabel>

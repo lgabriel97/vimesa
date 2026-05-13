@@ -1,7 +1,4 @@
-import type {
-  MedidaColumn,
-  MedidaRow,
-} from "@/VerificationForm/types/verificacion";
+import type { MedidaColumn, MedidaRow } from "../types/verificacion";
 
 export const DEFAULT_MEDIDAS: MedidaRow[] = [
   {

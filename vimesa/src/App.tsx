@@ -6,7 +6,7 @@ import { AppLayout } from "@/layouts/AppLayout";
 import Login from "@/login/pages/Login";
 import Inbox from "@/admin/pages/Inbox";
 import InformeDetalle from "@/admin/pages/InformeDetalle";
-import VerificacionForm from "@/VerificationForm/verificacion-form";
+import VerificacionForm from "./informes/tipos/verificacion-fm/Form";
 import { TooltipProvider } from "./components/ui/tooltip";
 import PdfsAdmin from "@/pages/PdfsAdmin";
 import MisInformes from "./pages/MisInformes";

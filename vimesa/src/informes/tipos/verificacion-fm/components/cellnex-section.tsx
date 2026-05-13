@@ -7,7 +7,7 @@ import { FieldGroup } from "@/components/ui/field";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { CELLNEX_OPCIONES } from "@/VerificationForm/constants/opciones";
+import { CELLNEX_OPCIONES } from "../constants/opciones";
 
 export function CellnexSection() {
   const [procede, setProcede] = useState(false);

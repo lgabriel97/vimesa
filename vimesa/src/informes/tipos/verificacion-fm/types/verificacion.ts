@@ -1,4 +1,7 @@
-export type { FormValues, MedidaRow } from "@/lib/schemas/informe";
+export type {
+  FormValues,
+  MedidaRow,
+} from "@/informes/tipos/verificacion-fm/schema";
 
 export type MedidaColumn = {
   key: string;

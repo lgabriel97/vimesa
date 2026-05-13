@@ -1,7 +1,10 @@
 import { Response, NextFunction } from "express";
 import { Prisma } from "../generated/prisma/client";
 import { prisma } from "../lib/prisma";
-import { InformeSchema, RevisionSchema } from "../schemas/informe";
+import {
+  InformeSchema,
+  RevisionSchema,
+} from "../informes/verificacion-fm/schema";
 import { AuthRequest } from "../middleware/auth";
 import { generarPdfInforme } from "../pdf/generador";
 

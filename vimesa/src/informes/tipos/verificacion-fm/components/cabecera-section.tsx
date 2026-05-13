@@ -16,12 +16,16 @@ import {
 } from "@/components/ui/field";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import type { FormValues } from "@/VerificationForm/types/verificacion";
-import { TIPO_EQUIPO_OPCIONES } from "@/VerificationForm/constants/opciones";
+import type { FormValues } from "../schema";
+import { TIPO_EQUIPO_OPCIONES } from "../constants/opciones";
 
 export function CabeceraSection() {
   const [bpLabel, setBPLabel] = useState("");
-  const { register, control, formState: { errors } } = useFormContext<FormValues>();
+  const {
+    register,
+    control,
+    formState: { errors },
+  } = useFormContext<FormValues>();
 
   return (
     <Card>

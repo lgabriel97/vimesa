@@ -11,14 +11,17 @@ import PdfsAdmin from "@/pages/PdfsAdmin";
 import MisInformes from "./pages/MisInformes";
 import NuevoInforme from "@/informes/NuevoInforme";
 import EditarInforme from "@/informes/EditarInforme";
+import GestionUsuarios from "@/admin/pages/GestionUsuarios";
 
 function HomeRedirect() {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
-  return (
-    <Navigate to={user.rol === "ADMIN" ? "/inbox" : "/mis-informes"} replace />
-  );
+  const target =
+    user.rol === "GOD" ? "/admin/usuarios" :
+    user.rol === "ADMIN" ? "/inbox" :
+    "/mis-informes";
+  return <Navigate to={target} replace />;
 }
 
 export default function App() {
@@ -83,6 +86,15 @@ export default function App() {
                 element={
                   <ProtectedRoute allowedRoles={["ADMIN"]}>
                     <PdfsAdmin />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/admin/usuarios"
+                element={
+                  <ProtectedRoute allowedRoles={["GOD"]}>
+                    <GestionUsuarios />
                   </ProtectedRoute>
                 }
               />

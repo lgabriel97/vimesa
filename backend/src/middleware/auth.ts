@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { env } from "../lib/env";
 
-export type Rol = "TECNICO" | "ADMIN";
+export type Rol = "TECNICO" | "ADMIN" | "GOD";
 
 export interface AuthRequest extends Request {
   user?: { id: string; rol: Rol };

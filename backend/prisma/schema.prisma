@@ -68,6 +68,7 @@ model Pdf {
   contenido     Bytes
   generadoPor   Usuario  @relation(fields: [generadoPorId], references: [id])
   generadoPorId String
+  esBorrador   Boolean  @default(true)
   createdAt     DateTime @default(now())
 
   @@index([informeId])
@@ -77,6 +78,7 @@ model Pdf {
 enum Rol {
   TECNICO
   ADMIN
+  GOD
 }
 
 enum EstadoInforme {

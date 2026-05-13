@@ -3,6 +3,7 @@ import cors from "cors";
 import authRoutes from "./routes/auth";
 import informesRoutes from "./routes/informes";
 import pdfsRoutes from "./routes/pdfs";
+import usuariosRoutes from "./routes/usuarios";
 import { errorHandler } from "./middleware/errorHandler";
 
 export const app = express();
@@ -14,5 +15,6 @@ app.get("/health", (_, res) => res.json({ ok: true }));
 app.use("/api/auth", authRoutes);
 app.use("/api/informes", informesRoutes);
 app.use("/api/pdfs", pdfsRoutes);
+app.use("/api/usuarios", usuariosRoutes);
 
 app.use(errorHandler);

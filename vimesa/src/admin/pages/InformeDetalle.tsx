@@ -46,7 +46,9 @@ export default function InformeDetalle() {
         method: "PATCH",
         body: JSON.stringify({ estado, comentariosRevisor: comentarios }),
       });
+
       toast.success(`Informe ${estado.toLowerCase()}`);
+
       navigate("/inbox");
     } catch (err: any) {
       toast.error(err.message);

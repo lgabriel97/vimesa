@@ -26,7 +26,7 @@ export interface TipoInformeConfig {
 
 export const TIPOS_INFORME: Record<TipoFormulario, TipoInformeConfig> = {
   VERIFICACION_FM: {
-    nombre: "Verificación de transmisor FM",
+    nombre: "Verificación de transmisor FM LCD",
     FormComponent: VerificacionFmForm,
     DetalleComponent: VerificacionFmDetalle,
     defaultDatos: DEFAULT_DATOS_FM,

@@ -27,7 +27,11 @@ export default function Login() {
     setLoading(true);
     try {
       const user = await login(email, password);
-      navigate(user.rol === "ADMIN" ? "/inbox" : "/nuevo", { replace: true });
+      const target =
+        user.rol === "GOD" ? "/admin/usuarios" :
+        user.rol === "ADMIN" ? "/inbox" :
+        "/nuevo";
+      navigate(target, { replace: true });
     } catch (err: any) {
       setError(err.message || "Error al iniciar sesión");
     } finally {

@@ -68,8 +68,12 @@ export function PdfsSection({ informeId, esTecnicoAutor, estadoInforme }: Props)
     }
   }
 
-  const puedeGenerarPreview = user?.rol === "TECNICO" && esTecnicoAutor;
-  const puedeGenerarDefinitivo = user?.rol === "ADMIN";
+  const esPendiente = estadoInforme === "PENDIENTE";
+  const puedeGenerar =
+    (esPendiente && (user?.rol === "ADMIN" || (user?.rol === "TECNICO" && esTecnicoAutor))) ||
+    (!esPendiente && user?.rol === "ADMIN");
+  const tipoBoton = esPendiente ? "preview" : "definitivo";
+  const textoBoton = esPendiente ? "Generar borrador" : "Regenerar definitivo";
 
   return (
     <Card>
@@ -79,26 +83,15 @@ export function PdfsSection({ informeId, esTecnicoAutor, estadoInforme }: Props)
           Documentos PDF
         </CardTitle>
         <div className="flex gap-2">
-          {puedeGenerarPreview && (
+          {puedeGenerar && (
             <Button
               variant="outline"
               size="sm"
-              onClick={() => generar("preview")}
+              onClick={() => generar(tipoBoton)}
               disabled={generando}
             >
               <RefreshCw className="mr-2 h-4 w-4" />
-              {pdfs.length === 0 ? "Generar PDF" : "Regenerar PDF"}
-            </Button>
-          )}
-          {puedeGenerarDefinitivo && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => generar("definitivo")}
-              disabled={generando}
-            >
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Regenerar definitivo
+              {pdfs.length === 0 ? "Generar PDF" : textoBoton}
             </Button>
           )}
         </div>
@@ -125,9 +118,9 @@ export function PdfsSection({ informeId, esTecnicoAutor, estadoInforme }: Props)
                 <TableRow key={pdf.id}>
                   <TableCell>
                     <Badge
-                      variant={estadoInforme === "APROBADO" ? "default" : "secondary"}
+                      variant={pdf.esBorrador ? "secondary" : "default"}
                     >
-                      {estadoInforme === "APROBADO" ? "Definitivo" : "Borrador"}
+                      {pdf.esBorrador ? "Borrador" : "Definitivo"}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-sm">

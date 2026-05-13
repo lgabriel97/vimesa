@@ -49,6 +49,11 @@ export function AppLayout() {
                   </Link>
                 </>
               )}
+              {user.rol === "GOD" && (
+                <Link to="/admin/usuarios" className="text-sm hover:underline">
+                  Usuarios
+                </Link>
+              )}
             </nav>
           )}
 
@@ -59,7 +64,7 @@ export function AppLayout() {
                   {user.nombre}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {user.rol === "ADMIN" ? "Administrador" : "Técnico"}
+                  {user.rol === "GOD" ? "Super Admin" : user.rol === "ADMIN" ? "Administrador" : "Técnico"}
                 </span>
               </div>
               <Button variant="outline" size="sm" onClick={handleLogout}>

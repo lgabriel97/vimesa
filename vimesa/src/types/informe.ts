@@ -1,4 +1,4 @@
-export type Rol = "TECNICO" | "ADMIN";
+export type Rol = "TECNICO" | "ADMIN" | "GOD";
 export type EstadoInforme = "PENDIENTE" | "APROBADO" | "RECHAZADO" | "DEVUELTO";
 export type TipoFormulario = "VERIFICACION_FM" | "VERIFICACION_FM_DDS" | "VERIFICACION_UCA";
 
@@ -28,6 +28,7 @@ export interface Informe {
 export interface PdfRecord {
   id: string;
   createdAt: string;
+  esBorrador?: boolean;
   generadoPor: { id: string; nombre: string };
   informe?: {
     id: string;

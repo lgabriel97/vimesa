@@ -5,8 +5,9 @@ import { generarPdfInforme } from "../pdf/generador";
 
 /**
  * POST /api/informes/:id/pdf
- * Genera un PDF del informe. Solo admin.
- * La marca "BORRADOR" se aplica si el informe NO está APROBADO.
+ * Genera un PDF del informe. El body puede incluir { tipo: "preview" | "definitivo" }.
+ * - "preview" reemplaza cualquier PDF borrador anterior del mismo informe.
+ * - "definitivo" reemplaza TODOS los PDFs anteriores (borradores y definitivos).
  */
 export async function generarPdf(
   req: AuthRequest,
@@ -18,9 +19,7 @@ export async function generarPdf(
     if (typeof id !== "string")
       return res.status(400).json({ error: "ID inválido" });
 
-    if (req.user!.rol !== "ADMIN") {
-      return res.status(403).json({ error: "Solo admin puede generar PDFs" });
-    }
+    const tipo = req.body?.tipo === "definitivo" ? "definitivo" : "preview";
 
     const informe = await prisma.informe.findUnique({
       where: { id },
@@ -32,9 +31,24 @@ export async function generarPdf(
     if (!informe)
       return res.status(404).json({ error: "Informe no encontrado" });
 
+    if (tipo === "definitivo" && req.user!.rol !== "ADMIN") {
+      return res.status(403).json({ error: "Solo admin puede generar PDFs definitivos" });
+    }
+    if (tipo === "preview" && req.user!.rol === "TECNICO" && req.user!.id !== informe.tecnicoId) {
+      return res.status(403).json({ error: "Solo el autor puede generar borradores" });
+    }
+
+    const esBorrador = tipo !== "definitivo";
+
+    if (tipo === "definitivo") {
+      await prisma.pdf.deleteMany({ where: { informeId: id } });
+    } else {
+      await prisma.pdf.deleteMany({ where: { informeId: id, esBorrador: true } });
+    }
+
     const buffer = await generarPdfInforme({
       informe,
-      esBorrador: informe.estado !== "APROBADO",
+      esBorrador,
     });
 
     const pdf = await prisma.pdf.create({
@@ -42,10 +56,12 @@ export async function generarPdf(
         informeId: id,
         contenido: new Uint8Array(buffer),
         generadoPorId: req.user!.id,
+        esBorrador,
       },
       select: {
         id: true,
         createdAt: true,
+        esBorrador: true,
         generadoPor: { select: { id: true, nombre: true } },
       },
     });
@@ -86,6 +102,7 @@ export async function listarPdfsDeInforme(
       select: {
         id: true,
         createdAt: true,
+        esBorrador: true,
         generadoPor: { select: { id: true, nombre: true } },
       },
     });
@@ -130,9 +147,7 @@ export async function descargarPdf(
     }
 
     const fecha = pdf.createdAt.toISOString().slice(0, 10);
-    const sufijo =
-      pdf.informe.estado === "APROBADO" ? "definitivo" : "borrador";
-    // Como ya no hay "equipo" en columna, usamos el id del informe o el tipo
+    const sufijo = pdf.esBorrador ? "borrador" : "definitivo";
     const filename = `${pdf.informe.tipo.toLowerCase()}_${pdf.informeId.slice(0, 8)}_${sufijo}_${fecha}.pdf`;
 
     const bytes = Buffer.from(pdf.contenido);
@@ -164,6 +179,7 @@ export async function listarPdfs(
       select: {
         id: true,
         createdAt: true,
+        esBorrador: true,
         informe: {
           select: {
             id: true,

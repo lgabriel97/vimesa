@@ -25,10 +25,11 @@ RUN npm ci --omit=dev
 RUN npm install prisma@7 tsx --no-save
 
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/src/generated ./src/generated  
+COPY --from=builder /app/src/generated ./src/generated
+COPY --from=builder /app/src/assets/vimesa-logo.png ./dist/assets/vimesa-logo.png
 COPY --from=builder /app/prisma ./prisma
 COPY prisma.config.ts ./
 
 EXPOSE 3000
 
-CMD sh -c "npx prisma migrate deploy && node dist/index.js"
+CMD sh -c "npx prisma migrate deploy && npx tsx prisma/seed.ts && node dist/index.js"

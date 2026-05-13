@@ -207,6 +207,8 @@ export async function revisarInforme(
         });
 
         if (informeCompleto) {
+          await prisma.pdf.deleteMany({ where: { informeId: id } });
+
           const buffer = await generarPdfInforme({
             informe: informeCompleto,
             esBorrador: false,
@@ -217,6 +219,7 @@ export async function revisarInforme(
               informeId: id,
               contenido: new Uint8Array(buffer),
               generadoPorId: req.user!.id,
+              esBorrador: false,
             },
           });
         }

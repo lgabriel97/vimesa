@@ -1,33 +1,12 @@
 import { z } from "zod";
-
-const numOrNull = z.union([z.number(), z.null()]).optional().nullable();
+import { MedidaSchema } from "../verificacion-fm/schema";
 
 const optionalString = z.preprocess(
   (v) => (typeof v === "string" && v.trim() === "" ? null : v),
   z.string().nullable().optional(),
 );
 
-export const MedidaSchema = z.object({
-  frecMhz: z.number().nullable(),
-  potW: numOrNull,
-  vpaV: numOrNull,
-  ipa1: numOrNull,
-  ipa2: numOrNull,
-  ipa3: numOrNull,
-  tOut: numOrNull,
-  tCase: numOrNull,
-  tPwS: numOrNull,
-  eff: numOrNull,
-  if1: numOrNull,
-  if2: numOrNull,
-  if3: numOrNull,
-});
-
-/**
- * Schema de los DATOS específicos del formulario de Verificación FM.
- * Lo común (fecha, firma, estado) lo gestiona el modelo Informe.
- */
-export const VerificacionFmDatosSchema = z.object({
+export const VerificacionFmDdsDatosSchema = z.object({
   equipo: optionalString,
   noOrden: optionalString,
   nSerie: optionalString,
@@ -70,7 +49,6 @@ export const VerificacionFmDatosSchema = z.object({
     .optional(),
 
   medidas: z.array(MedidaSchema),
-  medidasCamara: z.array(MedidaSchema),
 });
 
-export type VerificacionFmDatos = z.infer<typeof VerificacionFmDatosSchema>;
+export type VerificacionFmDdsDatos = z.infer<typeof VerificacionFmDdsDatosSchema>;

@@ -108,10 +108,10 @@ export default function MisInformes() {
                 {informes.map((i) => (
                   <TableRow key={i.id}>
                     <TableCell className="font-medium">
-                      {i.equipo ?? "—"}
+                      {i.datos?.equipo ?? "—"}
                     </TableCell>
-                    <TableCell>{i.cliente ?? "—"}</TableCell>
-                    <TableCell>{i.noOrden ?? "—"}</TableCell>
+                    <TableCell>{i.datos?.cliente ?? "—"}</TableCell>
+                    <TableCell>{i.datos?.noOrden ?? "—"}</TableCell>
                     <TableCell>
                       {new Date(i.createdAt).toLocaleDateString()}
                     </TableCell>

@@ -6,10 +6,11 @@ import { AppLayout } from "@/layouts/AppLayout";
 import Login from "@/login/pages/Login";
 import Inbox from "@/admin/pages/Inbox";
 import InformeDetalle from "@/admin/pages/InformeDetalle";
-import VerificacionForm from "./informes/tipos/verificacion-fm/Form";
 import { TooltipProvider } from "./components/ui/tooltip";
 import PdfsAdmin from "@/pages/PdfsAdmin";
 import MisInformes from "./pages/MisInformes";
+import NuevoInforme from "@/informes/NuevoInforme";
+import EditarInforme from "@/informes/EditarInforme";
 
 function HomeRedirect() {
   const { user, loading } = useAuth();
@@ -43,7 +44,7 @@ export default function App() {
                 path="/nuevo"
                 element={
                   <ProtectedRoute allowedRoles={["TECNICO"]}>
-                    <VerificacionForm />
+                    <NuevoInforme />
                   </ProtectedRoute>
                 }
               />
@@ -58,6 +59,14 @@ export default function App() {
               />
 
               <Route path="/informes/:id" element={<InformeDetalle />} />
+              <Route
+                path="/informes/:id/editar"
+                element={
+                  <ProtectedRoute>
+                    <EditarInforme />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* MOVER AQUÍ DENTRO */}
               <Route

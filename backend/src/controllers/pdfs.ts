@@ -25,7 +25,6 @@ export async function generarPdf(
     const informe = await prisma.informe.findUnique({
       where: { id },
       include: {
-        medidas: { orderBy: [{ tipo: "asc" }, { orden: "asc" }] },
         tecnico: { select: { id: true, nombre: true, email: true } },
       },
     });
@@ -117,8 +116,7 @@ export async function descargarPdf(
           select: {
             id: true,
             tecnicoId: true,
-            equipo: true,
-            noOrden: true,
+            tipo: true,
             estado: true,
           },
         },
@@ -134,11 +132,8 @@ export async function descargarPdf(
     const fecha = pdf.createdAt.toISOString().slice(0, 10);
     const sufijo =
       pdf.informe.estado === "APROBADO" ? "definitivo" : "borrador";
-    const equipo = (pdf.informe.equipo || "informe").replace(
-      /[^a-zA-Z0-9-]/g,
-      "_",
-    );
-    const filename = `${equipo}_${sufijo}_${fecha}.pdf`;
+    // Como ya no hay "equipo" en columna, usamos el id del informe o el tipo
+    const filename = `${pdf.informe.tipo.toLowerCase()}_${pdf.informeId.slice(0, 8)}_${sufijo}_${fecha}.pdf`;
 
     const bytes = Buffer.from(pdf.contenido);
 
@@ -172,10 +167,9 @@ export async function listarPdfs(
         informe: {
           select: {
             id: true,
-            equipo: true,
-            cliente: true,
-            noOrden: true,
+            tipo: true,
             estado: true,
+            datos: true,
           },
         },
         generadoPor: { select: { id: true, nombre: true } },

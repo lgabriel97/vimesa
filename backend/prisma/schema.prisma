@@ -25,33 +25,17 @@ model Usuario {
 model Informe {
   id String @id @default(uuid())
 
-  equipo     String?
-  noOrden    String?
-  nSerie     String?
-  cliente    String?
-  sitio      String?
-  tipoEquipo TipoEquipo?
+  // === Tipo de formulario (discriminador) ===
+  tipo TipoFormulario
 
-  tempAmbiente  Float?
-  observaciones String?
+  // === Datos específicos del tipo ===
+  datos Json
 
-  versionFirmware  String?
-  versionWebServer String?
-
-  snmpV1 Json?
-  snmpV2 Json?
-
-  testsRealizados String[]
-  cellnexConfig   String[]
-
-  equipoApto      Boolean  @default(false)
-  motivosNoApto   String?
-  actuaciones     String?
+  // === Comunes garantizados (proceso de validación) ===
   fechaConclusion DateTime
   firmaTecnico    String
 
-  medidas Medida[]
-
+  // === Workflow ===
   estado             EstadoInforme @default(PENDIENTE)
   tecnico            Usuario       @relation("TecnicoInformes", fields: [tecnicoId], references: [id])
   tecnicoId          String
@@ -67,31 +51,15 @@ model Informe {
 
   @@index([estado])
   @@index([tecnicoId])
+  @@index([tipo])
 }
 
-model Medida {
-  id        String     @id @default(uuid())
-  informe   Informe    @relation(fields: [informeId], references: [id], onDelete: Cascade)
-  informeId String
-  tipo      TipoMedida
-  orden     Int
-
-  frecMhz Float?
-  potW    Float?
-  vpaV    Float?
-  ipa1    Float?
-  ipa2    Float?
-  ipa3    Float?
-  tOut    Float?
-  tCase   Float?
-  tPwS    Float?
-  eff     Float?
-  if1     Float?
-  if2     Float?
-  if3     Float?
-
-  @@index([informeId])
+enum TipoFormulario {
+  VERIFICACION_FM
+  VERIFICACION_FM_DDS
+  VERIFICACION_UCA
 }
+
 
 model Pdf {
   id            String   @id @default(uuid())
@@ -111,20 +79,9 @@ enum Rol {
   ADMIN
 }
 
-enum TipoEquipo {
-  NUEVO
-  REPARADO_FABRICA
-  REPARADO_VIMESA
-}
-
 enum EstadoInforme {
   PENDIENTE
   APROBADO
   RECHAZADO
   DEVUELTO
-}
-
-enum TipoMedida {
-  PRINCIPAL
-  CAMARA
 }

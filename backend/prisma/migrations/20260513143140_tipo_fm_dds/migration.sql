@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "TipoFormulario" ADD VALUE 'VERIFICACION_FM_DDS';

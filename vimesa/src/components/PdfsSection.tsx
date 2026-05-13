@@ -14,14 +14,15 @@ import { toast } from "sonner";
 import { Download, FileText, RefreshCw } from "lucide-react";
 import { apiFetch, downloadPdf } from "@/lib/api";
 import { useAuth } from "@/auth/AuthContext";
-import type { PdfRecord } from "@/types/informe";
+import type { PdfRecord, EstadoInforme } from "@/types/informe";
 
 interface Props {
   informeId: string;
   esTecnicoAutor: boolean;
+  estadoInforme: EstadoInforme;
 }
 
-export function PdfsSection({ informeId, esTecnicoAutor }: Props) {
+export function PdfsSection({ informeId, esTecnicoAutor, estadoInforme }: Props) {
   const { user } = useAuth();
   const [pdfs, setPdfs] = useState<PdfRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -86,9 +87,7 @@ export function PdfsSection({ informeId, esTecnicoAutor }: Props) {
               disabled={generando}
             >
               <RefreshCw className="mr-2 h-4 w-4" />
-              {pdfs.some((p) => p.tipo === "PREVIEW")
-                ? "Regenerar borrador"
-                : "Generar borrador"}
+              {pdfs.length === 0 ? "Generar PDF" : "Regenerar PDF"}
             </Button>
           )}
           {puedeGenerarDefinitivo && (
@@ -126,11 +125,9 @@ export function PdfsSection({ informeId, esTecnicoAutor }: Props) {
                 <TableRow key={pdf.id}>
                   <TableCell>
                     <Badge
-                      variant={
-                        pdf.tipo === "DEFINITIVO" ? "default" : "secondary"
-                      }
+                      variant={estadoInforme === "APROBADO" ? "default" : "secondary"}
                     >
-                      {pdf.tipo === "DEFINITIVO" ? "Definitivo" : "Borrador"}
+                      {estadoInforme === "APROBADO" ? "Definitivo" : "Borrador"}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-sm">

@@ -1,17 +1,14 @@
 import { LOGO_DATA_URI } from "../../assets/logo";
 
-// Helper para mostrar valores que pueden ser null
 function v(value: unknown): string {
   if (value === null || value === undefined || value === "") return "";
   return String(value);
 }
 
-// Helper para checkbox marcado/desmarcado
 function check(condition: boolean): string {
   return condition ? "☒" : "☐";
 }
 
-// Helper para mapear el enum del backend al texto humano
 const TIPO_EQUIPO_LABEL: Record<string, string> = {
   NUEVO: "nuevo",
   REPARADO_FABRICA: "reparado en fábrica",
@@ -19,18 +16,17 @@ const TIPO_EQUIPO_LABEL: Record<string, string> = {
 };
 
 interface PlantillaInput {
-  informe: any; // tipo Informe + medidas + tecnico
-  esBorrador: boolean; // true si es preview, marca con "BORRADOR"
+  informe: any;
+  esBorrador: boolean;
 }
 
-export function generarHtmlVerificacionFm({
+export function generarHtmlVerificacionFmDds({
   informe,
   esBorrador,
 }: PlantillaInput): string {
   const datos = informe.datos || {};
 
   const medidasPrincipal = datos.medidas || [];
-  const medidasCamara = datos.medidasCamara || [];
   const tests = datos.testsRealizados || [];
   const cellnex = datos.cellnexConfig || [];
 
@@ -131,7 +127,6 @@ export function generarHtmlVerificacionFm({
   .label { width: 18%; font-weight: 600; }
   .label-narrow { width: 12%; font-weight: 600; }
 
-  /* Tablas de mediciones */
   table.medidas th, table.medidas td {
     text-align: center;
     font-size: 8pt;
@@ -140,10 +135,8 @@ export function generarHtmlVerificacionFm({
 
   table.medidas th { background: #fff; }
 
-  /* Filas vacías para mediciones */
   table.medidas td.celda-vacia { min-height: 18px; }
 
-  /* Sección de checkboxes */
   .checkbox-row {
     display: flex;
     justify-content: space-between;
@@ -159,7 +152,6 @@ export function generarHtmlVerificacionFm({
     font-size: 11pt;
   }
 
-  /* Bloque conclusiones */
   .conclusion-area {
     height: 80px;
   }
@@ -175,11 +167,11 @@ export function generarHtmlVerificacionFm({
     </div>
   </div>
 
-  <div class="titulo">PROTOCOLO DE VERIFICACION DE TRANSMISORES DE FM VIMESA</div>
+  <div class="titulo">PROTOCOLO DE VERIFICACION DE TRANSMISORES DE FM DDS VIMESA</div>
 
   <table>
     <tr>
-      <td colspan="4">Equipo: Transmisor de FM Vimesa BP ${v(datos.equipo)} LCD &nbsp;&nbsp;&nbsp; </td>
+      <td colspan="4">Equipo: Transmisor de FM Vimesa BP ${v(datos.equipo)} DDS &nbsp;&nbsp;&nbsp; </td>
     </tr>
     <tr>
       <td class="label">No. Orden:</td>
@@ -237,33 +229,6 @@ export function generarHtmlVerificacionFm({
       <th>IF3(A)</th>
     </tr>
     ${renderFilasMedidas(medidasPrincipal)}
-  </table>
-
-  <table>
-    <tr>
-      <td colspan="13" style="text-align: center; font-weight: 700;">
-        Lectura de parámetros en cámara climática a 45ºC (si procede) en frecuencia de trabajo
-      </td>
-    </tr>
-  </table>
-
-  <table class="medidas">
-    <tr>
-      <th>Frec.(MHz)</th>
-      <th>Pot(W)</th>
-      <th>Vpa(V)</th>
-      <th>Ipa1(A)</th>
-      <th>Ipa2(A)</th>
-      <th>Ipa3(A)</th>
-      <th>TOut(ºC)</th>
-      <th>TCase(ºC)</th>
-      <th>TPwS(ºC)</th>
-      <th>Eff(%)</th>
-      <th>IF1(A)</th>
-      <th>IF2(A)</th>
-      <th>IF3(A)</th>
-    </tr>
-    ${renderFilasMedidas(medidasCamara, 1)}
   </table>
 
   <table>

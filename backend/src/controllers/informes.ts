@@ -1,25 +1,68 @@
 import { Response, NextFunction } from "express";
-import { Prisma } from "../generated/prisma/client";
+import { z } from "zod";
 import { prisma } from "../lib/prisma";
-import {
-  InformeSchema,
-  RevisionSchema,
-} from "../informes/verificacion-fm/schema";
 import { AuthRequest } from "../middleware/auth";
 import { generarPdfInforme } from "../pdf/generador";
+import { getTipoConfig, TIPOS_INFORME } from "../informes/registry";
 
-const tipoEquipoMap = {
-  nuevo: "NUEVO",
-  reparado_fabrica: "REPARADO_FABRICA",
-  reparado_vimesa: "REPARADO_VIMESA",
-} as const;
+// Schema "envoltorio": campos comunes + tipo + datos
+const InformeEnvoltorioSchema = z.object({
+  tipo: z.string().min(1),
+  fechaConclusion: z.string().min(1),
+  firmaTecnico: z.string().min(1),
+  datos: z.unknown(), // se validará con el schema específico del tipo
+});
+
+const RevisionSchema = z.object({
+  estado: z.enum(["APROBADO", "RECHAZADO", "DEVUELTO"]),
+  comentariosRevisor: z.string().optional(),
+});
 
 /**
- * PUT /api/informes/:id
- * Edita un informe existente.
- * - Técnico: solo si es el autor Y el informe está DEVUELTO. Al guardar, vuelve a PENDIENTE.
- * - Admin: cualquier informe en cualquier estado. Mantiene el estado actual.
+ * Valida el envoltorio + los datos específicos según el tipo.
  */
+function parseInforme(body: unknown) {
+  const envoltorio = InformeEnvoltorioSchema.parse(body);
+
+  if (!(envoltorio.tipo in TIPOS_INFORME)) {
+    throw new Error(`Tipo de informe no soportado: ${envoltorio.tipo}`);
+  }
+
+  const config = getTipoConfig(envoltorio.tipo);
+  const datos = config.schema.parse(envoltorio.datos);
+
+  return {
+    tipo: envoltorio.tipo as keyof typeof TIPOS_INFORME,
+    fechaConclusion: envoltorio.fechaConclusion,
+    firmaTecnico: envoltorio.firmaTecnico,
+    datos,
+  };
+}
+
+export async function crearInforme(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const data = parseInforme(req.body);
+
+    const informe = await prisma.informe.create({
+      data: {
+        tipo: data.tipo as any,
+        fechaConclusion: new Date(data.fechaConclusion),
+        firmaTecnico: data.firmaTecnico,
+        datos: data.datos as any,
+        tecnicoId: req.user!.id,
+      },
+    });
+
+    res.status(201).json(informe);
+  } catch (e) {
+    next(e);
+  }
+}
+
 export async function editarInforme(
   req: AuthRequest,
   res: Response,
@@ -30,17 +73,15 @@ export async function editarInforme(
     if (typeof id !== "string")
       return res.status(400).json({ error: "ID inválido" });
 
-    const data = InformeSchema.parse(req.body);
+    const data = parseInforme(req.body);
 
     const informeExistente = await prisma.informe.findUnique({
       where: { id },
-      select: { tecnicoId: true, estado: true },
+      select: { tecnicoId: true, estado: true, tipo: true },
     });
-
     if (!informeExistente)
       return res.status(404).json({ error: "No encontrado" });
 
-    // Permisos
     if (req.user!.rol === "TECNICO") {
       if (informeExistente.tecnicoId !== req.user!.id) {
         return res.status(403).json({ error: "No es tu informe" });
@@ -51,115 +92,27 @@ export async function editarInforme(
           .json({ error: "Solo puedes editar informes devueltos" });
       }
     }
-    // Admin puede editar siempre
 
-    // Tras la edición:
-    // - Si edita técnico: vuelve a PENDIENTE
-    // - Si edita admin: mantiene el estado
+    if (informeExistente.tipo !== data.tipo) {
+      return res
+        .status(400)
+        .json({ error: "No se puede cambiar el tipo del informe" });
+    }
+
     const nuevoEstado =
       req.user!.rol === "TECNICO" ? "PENDIENTE" : informeExistente.estado;
 
-    const informe = await prisma.$transaction(async (tx) => {
-      // Borra las medidas existentes y crea las nuevas (más simple que diff)
-      await tx.medida.deleteMany({ where: { informeId: id } });
-
-      return tx.informe.update({
-        where: { id },
-        data: {
-          equipo: data.equipo,
-          noOrden: data.noOrden,
-          nSerie: data.nSerie,
-          cliente: data.cliente,
-          sitio: data.sitio,
-          tipoEquipo: data.tipoEquipo ? tipoEquipoMap[data.tipoEquipo] : null,
-          tempAmbiente: data.tempAmbiente,
-          observaciones: data.observaciones,
-          versionFirmware: data.versionFirmware,
-          versionWebServer: data.versionWebServer,
-          snmpV1: data.snmpV1 ?? Prisma.JsonNull,
-          snmpV2: data.snmpV2 ?? Prisma.JsonNull,
-          testsRealizados: data.testsRealizados,
-          cellnexConfig: data.cellnexConfig,
-          equipoApto: data.equipoApto,
-          motivosNoApto: data.motivosNoApto,
-          actuaciones: data.actuaciones,
-          fechaConclusion: new Date(data.fechaConclusion),
-          firmaTecnico: data.firmaTecnico,
-          estado: nuevoEstado,
-          medidas: {
-            create: [
-              ...data.medidas.map((m, i) => ({
-                ...m,
-                tipo: "PRINCIPAL" as const,
-                orden: i,
-              })),
-              ...data.medidasCamara.map((m, i) => ({
-                ...m,
-                tipo: "CAMARA" as const,
-                orden: i,
-              })),
-            ],
-          },
-        },
-        include: { medidas: true },
-      });
+    const informe = await prisma.informe.update({
+      where: { id },
+      data: {
+        fechaConclusion: new Date(data.fechaConclusion),
+        firmaTecnico: data.firmaTecnico,
+        datos: data.datos as any,
+        estado: nuevoEstado,
+      },
     });
 
     res.json(informe);
-  } catch (e) {
-    next(e);
-  }
-}
-
-export async function crearInforme(
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction,
-) {
-  try {
-    const data = InformeSchema.parse(req.body);
-
-    const informe = await prisma.informe.create({
-      data: {
-        equipo: data.equipo,
-        noOrden: data.noOrden,
-        nSerie: data.nSerie,
-        cliente: data.cliente,
-        sitio: data.sitio,
-        tipoEquipo: data.tipoEquipo ? tipoEquipoMap[data.tipoEquipo] : null,
-        tempAmbiente: data.tempAmbiente,
-        observaciones: data.observaciones,
-        versionFirmware: data.versionFirmware,
-        versionWebServer: data.versionWebServer,
-        snmpV1: data.snmpV1 ?? Prisma.JsonNull,
-        snmpV2: data.snmpV2 ?? Prisma.JsonNull,
-        testsRealizados: data.testsRealizados,
-        cellnexConfig: data.cellnexConfig,
-        equipoApto: data.equipoApto,
-        motivosNoApto: data.motivosNoApto,
-        actuaciones: data.actuaciones,
-        fechaConclusion: new Date(data.fechaConclusion),
-        firmaTecnico: data.firmaTecnico,
-        tecnicoId: req.user!.id,
-        medidas: {
-          create: [
-            ...data.medidas.map((m, i) => ({
-              ...m,
-              tipo: "PRINCIPAL" as const,
-              orden: i,
-            })),
-            ...data.medidasCamara.map((m, i) => ({
-              ...m,
-              tipo: "CAMARA" as const,
-              orden: i,
-            })),
-          ],
-        },
-      },
-      include: { medidas: true },
-    });
-
-    res.status(201).json(informe);
   } catch (e) {
     next(e);
   }
@@ -173,9 +126,12 @@ export async function listarInformes(
   try {
     const estadoRaw = req.query.estado;
     const estado = typeof estadoRaw === "string" ? estadoRaw : undefined;
+    const tipoRaw = req.query.tipo;
+    const tipo = typeof tipoRaw === "string" ? tipoRaw : undefined;
 
     const where: any = {};
     if (estado) where.estado = estado.toUpperCase();
+    if (tipo) where.tipo = tipo.toUpperCase();
     if (req.user!.rol === "TECNICO") where.tecnicoId = req.user!.id;
 
     const informes = await prisma.informe.findMany({
@@ -203,7 +159,6 @@ export async function obtenerInforme(
     const informe = await prisma.informe.findUnique({
       where: { id },
       include: {
-        medidas: { orderBy: [{ tipo: "asc" }, { orden: "asc" }] },
         tecnico: { select: { id: true, nombre: true, email: true } },
         revisor: { select: { id: true, nombre: true } },
       },
@@ -242,14 +197,11 @@ export async function revisarInforme(
       },
     });
 
-    // Si se aprueba, generamos el PDF definitivo automáticamente.
-    // Si falla, lo logueamos pero no rompemos la aprobación.
     if (data.estado === "APROBADO") {
       try {
         const informeCompleto = await prisma.informe.findUnique({
           where: { id },
           include: {
-            medidas: { orderBy: [{ tipo: "asc" }, { orden: "asc" }] },
             tecnico: { select: { id: true, nombre: true, email: true } },
           },
         });
@@ -263,7 +215,6 @@ export async function revisarInforme(
           await prisma.pdf.create({
             data: {
               informeId: id,
-              // tipo: "DEFINITIVO",   ← ELIMINA esta línea
               contenido: new Uint8Array(buffer),
               generadoPorId: req.user!.id,
             },

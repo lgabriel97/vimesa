@@ -66,10 +66,10 @@ export default function MisPdfs() {
                 {pdfs.map((pdf) => (
                   <TableRow key={pdf.id}>
                     <TableCell className="font-medium">
-                      {pdf.informe?.equipo ?? "—"}
+                      {pdf.informe?.datos?.equipo ?? "—"}
                     </TableCell>
-                    <TableCell>{pdf.informe?.noOrden ?? "—"}</TableCell>
-                    <TableCell>{pdf.informe?.cliente ?? "—"}</TableCell>
+                    <TableCell>{pdf.informe?.datos?.noOrden ?? "—"}</TableCell>
+                    <TableCell>{pdf.informe?.datos?.cliente ?? "—"}</TableCell>
                     <TableCell>
                       <Badge variant="outline">{pdf.informe?.estado}</Badge>
                     </TableCell>

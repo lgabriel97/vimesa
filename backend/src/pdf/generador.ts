@@ -1,5 +1,5 @@
 import puppeteer, { Browser } from "puppeteer";
-import { generarHtmlInforme } from "../informes/verificacion-fm/pdf";
+import { getTipoConfig } from "../informes/registry";
 
 let browserPromise: Promise<Browser> | null = null;
 
@@ -13,7 +13,6 @@ function getBrowser(): Promise<Browser> {
   return browserPromise;
 }
 
-// Llamar al apagar la app, opcional
 export async function cerrarBrowser(): Promise<void> {
   if (browserPromise) {
     const browser = await browserPromise;
@@ -23,7 +22,7 @@ export async function cerrarBrowser(): Promise<void> {
 }
 
 interface GenerarPdfInput {
-  informe: any; // Informe con relaciones (tecnico, medidas)
+  informe: any;
   esBorrador: boolean;
 }
 
@@ -31,10 +30,12 @@ export async function generarPdfInforme({
   informe,
   esBorrador,
 }: GenerarPdfInput): Promise<Buffer> {
+  const config = getTipoConfig(informe.tipo);
+  const html = config.generarHtml({ informe, esBorrador });
+
   const browser = await getBrowser();
   const page = await browser.newPage();
   try {
-    const html = generarHtmlInforme({ informe, esBorrador });
     await page.setContent(html, { waitUntil: "networkidle0" });
 
     const pdfBuffer = await page.pdf({

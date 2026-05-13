@@ -89,9 +89,11 @@ export default function Inbox() {
               <TableBody>
                 {informes.map((i) => (
                   <TableRow key={i.id}>
-                    <TableCell className="font-medium">{i.equipo}</TableCell>
-                    <TableCell>{i.cliente}</TableCell>
-                    <TableCell>{i.noOrden}</TableCell>
+                    <TableCell className="font-medium">
+                      {i.datos?.equipo ?? "-"}
+                    </TableCell>
+                    <TableCell>{i.datos.cliente ?? "—"}</TableCell>
+                    <TableCell>{i.datos.noOrden ?? "—"}</TableCell>
                     <TableCell>{i.tecnico?.nombre ?? "—"}</TableCell>
                     <TableCell>
                       {new Date(i.createdAt).toLocaleDateString()}

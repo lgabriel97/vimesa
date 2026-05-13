@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 const numOrNull = z.union([z.number(), z.null()]).optional().nullable();
-
 const optionalString = z.preprocess(
   (v) => (typeof v === "string" && v.trim() === "" ? null : v),
   z.string().nullable().optional(),
@@ -23,11 +22,7 @@ export const MedidaSchema = z.object({
   if3: numOrNull,
 });
 
-/**
- * Schema de los DATOS específicos del formulario de Verificación FM.
- * Lo común (fecha, firma, estado) lo gestiona el modelo Informe.
- */
-export const VerificacionFmDatosSchema = z.object({
+export const VerificacionFmDdsDatosSchema = z.object({
   equipo: optionalString,
   noOrden: optionalString,
   nSerie: optionalString,
@@ -38,16 +33,13 @@ export const VerificacionFmDatosSchema = z.object({
   versionWebServer: optionalString,
   actuaciones: optionalString,
   motivosNoApto: optionalString,
-
   tipoEquipo: z
     .enum(["nuevo", "reparado_fabrica", "reparado_vimesa"])
-    .nullable()
     .optional(),
   tempAmbiente: z.number().nullable().optional(),
   equipoApto: z.boolean(),
   testsRealizados: z.array(z.string()),
   cellnexConfig: z.array(z.string()),
-
   snmpV1: z
     .object({
       ip: optionalString,
@@ -55,9 +47,7 @@ export const VerificacionFmDatosSchema = z.object({
       gateway: optionalString,
       password: optionalString,
     })
-    .nullable()
     .optional(),
-
   snmpV2: z
     .object({
       ip: optionalString,
@@ -66,11 +56,47 @@ export const VerificacionFmDatosSchema = z.object({
       login: optionalString,
       password: optionalString,
     })
-    .nullable()
     .optional(),
-
   medidas: z.array(MedidaSchema),
-  medidasCamara: z.array(MedidaSchema),
 });
 
-export type VerificacionFmDatos = z.infer<typeof VerificacionFmDatosSchema>;
+export const VerificacionFmDdsFormSchema = z.object({
+  fechaConclusion: z.string().min(1, "Obligatorio"),
+  firmaTecnico: z.string().min(1, "Obligatorio"),
+
+  equipo: optionalString,
+  noOrden: optionalString,
+  nSerie: optionalString,
+  cliente: optionalString,
+  sitio: optionalString,
+  observaciones: optionalString,
+  versionFirmware: optionalString,
+  versionWebServer: optionalString,
+  actuaciones: optionalString,
+  motivosNoApto: optionalString,
+  tipoEquipo: z.enum(["nuevo", "reparado_fabrica", "reparado_vimesa"]).optional(),
+  tempAmbiente: z.number().nullable().optional(),
+  equipoApto: z.boolean(),
+  testsRealizados: z.array(z.string()),
+  cellnexConfig: z.array(z.string()),
+  snmpV1: z.object({
+    ip: optionalString,
+    mask: optionalString,
+    gateway: optionalString,
+    password: optionalString,
+  }).optional(),
+  snmpV2: z.object({
+    ip: optionalString,
+    mask: optionalString,
+    gateway: optionalString,
+    login: optionalString,
+    password: optionalString,
+  }).optional(),
+  medidas: z.array(MedidaSchema),
+});
+
+export type VerificacionFmDdsDatos = z.infer<typeof VerificacionFmDdsDatosSchema>;
+export type VerificacionFmDdsFormValues = z.infer<typeof VerificacionFmDdsFormSchema>;
+
+export type FormValues = VerificacionFmDdsFormValues;
+export type MedidaRow = z.infer<typeof MedidaSchema>;

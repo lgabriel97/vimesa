@@ -9,17 +9,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import {
-  VerificacionFmFormSchema,
-  type VerificacionFmFormValues,
+  VerificacionFmDdsFormSchema,
+  type VerificacionFmDdsFormValues,
 } from "./schema";
-import { DEFAULT_FM_FORM_VALUES } from "./defaults";
+import { DEFAULT_FM_DDS_FORM_VALUES } from "./defaults";
 import { apiFetch, ApiError } from "@/lib/api";
 import { CabeceraSection } from "./components/cabecera-section";
 import { CellnexSection } from "./components/cellnex-section";
 import { ActuacionesSection } from "./components/actuaciones-section";
 import { ConclusionesSection } from "./components/conclusiones-section";
 import { MedidasTable } from "./components/medidas-table";
-import { MedidasCamaraTable } from "./components/medidas-camara-table";
 import { TestsFirmwareSection } from "./components/tests-firmware-section";
 
 interface Props {
@@ -28,7 +27,7 @@ interface Props {
   onSuccess?: () => void;
 }
 
-export default function VerificacionFmForm({
+export default function VerificacionFmDdsForm({
   informeId,
   defaultDatos,
   onSuccess,
@@ -36,26 +35,24 @@ export default function VerificacionFmForm({
   const navigate = useNavigate();
   const esEdicion = !!informeId;
 
-  // Si se pasan defaults (modo edición), mergeamos con los DEFAULT base
-  const initialValues: VerificacionFmFormValues = {
-    ...DEFAULT_FM_FORM_VALUES,
+  const initialValues: VerificacionFmDdsFormValues = {
+    ...DEFAULT_FM_DDS_FORM_VALUES,
     ...(defaultDatos ?? {}),
   };
 
-  const methods = useForm<VerificacionFmFormValues>({
+  const methods = useForm<VerificacionFmDdsFormValues>({
     defaultValues: initialValues,
-    resolver: zodResolver(VerificacionFmFormSchema) as any,
+    resolver: zodResolver(VerificacionFmDdsFormSchema) as any,
     mode: "onSubmit",
   });
 
   const { handleSubmit, reset, setError } = methods;
 
-  async function onValid(values: VerificacionFmFormValues) {
-    // Separa fechaConclusion + firmaTecnico de los datos específicos
+  async function onValid(values: VerificacionFmDdsFormValues) {
     const { fechaConclusion, firmaTecnico, ...datos } = values;
 
     const payload = {
-      tipo: "VERIFICACION_FM",
+      tipo: "VERIFICACION_FM_DDS",
       fechaConclusion,
       firmaTecnico,
       datos,
@@ -76,7 +73,7 @@ export default function VerificacionFmForm({
         toast.success("Verificación enviada", {
           description: "El informe está pendiente de revisión.",
         });
-        reset(DEFAULT_FM_FORM_VALUES);
+        reset(DEFAULT_FM_DDS_FORM_VALUES);
       }
 
       if (onSuccess) {
@@ -92,7 +89,7 @@ export default function VerificacionFmForm({
         if (details.fieldErrors) {
           Object.entries(details.fieldErrors).forEach(([field, messages]) => {
             if (messages?.[0]) {
-              setError(field as keyof VerificacionFmFormValues, {
+              setError(field as keyof VerificacionFmDdsFormValues, {
                 message: messages[0],
               });
             }
@@ -110,7 +107,7 @@ export default function VerificacionFmForm({
     }
   }
 
-  const onInvalid: SubmitErrorHandler<VerificacionFmFormValues> = (errors) => {
+  const onInvalid: SubmitErrorHandler<VerificacionFmDdsFormValues> = (errors) => {
     const firstPath = getFirstErrorPath(errors);
     if (firstPath) {
       const fieldLabel = getLabelForPath(firstPath);
@@ -133,7 +130,6 @@ export default function VerificacionFmForm({
       >
         <CabeceraSection />
         <MedidasTable />
-        <MedidasCamaraTable />
         <TestsFirmwareSection />
         <CellnexSection />
         <ActuacionesSection />
